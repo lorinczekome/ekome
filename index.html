@@ -19,45 +19,68 @@
 
         header {
             height: 80px; display: flex; justify-content: space-between; align-items: center;
-            padding: 0 64px; border-bottom: 1px solid #E5E5E5; background-color: #f9f9f9;
-            flex-shrink: 0;
+            padding: 0 32px; border-bottom: 1px solid #E5E5E5; background-color: #f9f9f9;
+            flex-shrink: 0; z-index: 1000;
         }
 
-        .nav-links { display: flex; gap: 48px; } /* Menüpontok közti távolság */
-        .nav-links a, .btn-primary { 
-            text-decoration: none; font-size: 12px; font-weight: 600; 
-            letter-spacing: 2px; color: #5e5e5e; text-transform: uppercase;
+        .logo-text { font-size: 20px; font-weight: 500; }
+
+        /* Desktop elrendezés */
+        .nav-container { display: flex; align-items: center; gap: 32px; }
+        .hamburger { display: none; cursor: pointer; flex-direction: column; gap: 5px; z-index: 1001; }
+        .hamburger div { width: 25px; height: 2px; background: #000; transition: all 0.3s; }
+
+        /* Tablet és Mobil nézet */
+        @media (max-width: 900px) {
+            .nav-container { display: none; }
+            .hamburger { display: flex; }
         }
-        .btn-primary { background: #000; color: #fff; padding: 12px 32px; }
+
+        /* Hamburger Animáció */
+        .hamburger.active div:nth-child(1) { transform: rotate(45deg) translate(7px, 6px); }
+        .hamburger.active div:nth-child(2) { opacity: 0; }
+        .hamburger.active div:nth-child(3) { transform: rotate(-45deg) translate(7px, -6px); }
+
+        #mobile-menu {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000000; flex-direction: column; align-items: center; justify-content: center;
+            gap: 40px; z-index: 999;
+        }
+
+        .nav-link { text-decoration: none !important; font-size: 14px; font-weight: 600; color: #5e5e5e; text-transform: uppercase; }
+        .mobile-nav-link { text-decoration: none !important; color: #E8E8E8; font-size: 18px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .btn-primary { 
+            background: #000; color: #e0e0e0; padding: 12px 32px; 
+            text-decoration: none !important; font-size: 12px; font-weight: 600; letter-spacing: 1px; 
+        }
 
         main { flex-grow: 1; position: relative; overflow: hidden; background-color: #f9f9f9; }
+        .parallax-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center bottom; background-repeat: repeat-x; }
 
-        .parallax-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover; background-position: center bottom;
-            background-repeat: repeat-x;
-        }
-
-        footer {
-            height: 50px; background: #ffffff; border-top: 1px solid #E5E5E5;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 64px; font-family: 'Montserrat', sans-serif;
-            font-size: 14px; color: #000; flex-shrink: 0;
-        }
+        footer { height: 50px; background: #ffffff; border-top: 1px solid #E5E5E5; display: flex; justify-content: space-between; align-items: center; padding: 0 32px; font-size: 12px; flex-shrink: 0; }
         footer a { color: #000; text-decoration: none; font-weight: 600; }
-        footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
 
     <header>
-        <div style="font-size: 24px; font-weight: 500;">MOTIVUMLÉNYEK</div>
-        <div class="nav-links">
-            <a href="https://motivumalkoto.hu/about" target="_blank" rel="noopener noreferrer">BACKGROUND</a>
-            <a href="https://motivumalkoto.hu/gallery" target="_blank" rel="noopener noreferrer">ABOUT</a>
-            <a href="https://www.motivumalkoto.hu" target="_blank" rel="noopener noreferrer" class="btn-primary">MOTIVUMALKOTÓ</a>
+        <div class="logo-text">MOTIVUMLÉNYEK</div>
+        <div class="nav-container">
+            <a href="https://motivumalkoto.hu/about" class="nav-link">BACKGROUND</a>
+            <a href="https://motivumalkoto.hu/gallery" class="nav-link">ABOUT</a>
+            <a href="https://www.motivumalkoto.hu" class="btn-primary">MOTIVUMALKOTÓ</a>
+        </div>
+        <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+            <div></div><div></div><div></div>
         </div>
     </header>
+
+    <div id="mobile-menu">
+        <a href="https://motivumalkoto.hu/about" class="mobile-nav-link">BACKGROUND</a>
+        <a href="https://motivumalkoto.hu/gallery" class="mobile-nav-link">ABOUT</a>
+        <a href="https://www.motivumalkoto.hu" class="btn-primary">MOTIVUMALKOTÓ</a>
+    </div>
 
     <main>
         <div class="parallax-layer" id="layer-bg" style="background-image: url('MotivumCsapat_backArtboard 1.png'); z-index: 10;"></div>
@@ -66,27 +89,43 @@
 
     <footer>
         <div>© 2026 MOTIVUMALKOTÓ</div>
-        <a href="https://www.instagram.com/motifcreator" target="_blank" rel="noopener noreferrer">INSTAGRAM</a>
+        <a href="https://www.instagram.com/motifcreator" target="_blank">INSTAGRAM</a>
     </footer>
 
     <script>
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const hamburger = document.getElementById('hamburger');
+            
+            if (menu.style.display === 'flex') {
+                menu.style.display = 'none';
+                hamburger.classList.remove('active');
+            } else {
+                menu.style.display = 'flex';
+                hamburger.classList.add('active');
+            }
+        }
+
         const bg = document.getElementById('layer-bg');
         const fg = document.getElementById('layer-fg');
-        
         let mouseX = 0;
         let currentPos = 0;
-        let speed = 0;
 
         window.addEventListener('mousemove', (e) => {
             mouseX = (e.clientX / window.innerWidth) * 2 - 1;
         });
 
+        let autoMove = 0;
         gsap.ticker.add(() => {
-            speed = mouseX * 3; 
-            currentPos += speed;
-
-            gsap.set(bg, { backgroundPositionX: currentPos * 0.2 + "px" });
-            gsap.set(fg, { backgroundPositionX: currentPos * 0.8 + "px" });
+            if (window.innerWidth < 900) {
+                autoMove += 0.5;
+                gsap.set(bg, { backgroundPositionX: Math.sin(autoMove * 0.02) * 50 + "px" });
+                gsap.set(fg, { backgroundPositionX: Math.sin(autoMove * 0.05) * 100 + "px" });
+            } else {
+                currentPos += mouseX * 3;
+                gsap.set(bg, { backgroundPositionX: currentPos * 0.2 + "px" });
+                gsap.set(fg, { backgroundPositionX: currentPos * 0.8 + "px" });
+            }
         });
     </script>
 </body>
