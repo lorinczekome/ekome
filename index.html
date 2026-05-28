@@ -126,7 +126,7 @@
             <div class="flex items-center gap-3">
                 <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZ--jWlkEZwl9VUR0g3NHXXlntF5R4R0YWqjj6GAPG8PZ-jigPQ5mbmxZiI_moG1L8jQlrDCb8DctBY5md4IIb_jddAtO9oZTnt7m0qJxiFTyInbvVDmoeYtm_ZjJkYD6ia3ANFfIkB72ZEP_xbIezOfCPut47Mj8Ov-HhLujTASfVYkEDOM8sAvlebyczkh6lcKY_tu1i5QNPzuPbBG3WyJstX956v5OYdkFiAQD5O9RqJqVvImTlGF5BxzQcEsLZ-WRXRpVBKls" alt="Motivum Icon" class="w-8 h-8 rounded-full object-cover"/>
                 <div class="text-3xl font-medium tracking-tighter text-primary">
-                    MOTIVUM
+                    MOTIVUMLÉNYEK
                 </div>
             </div>
 
@@ -134,11 +134,10 @@
                 <a href="#" class="text-xs font-semibold tracking-widest text-primary border-b border-primary pb-1">LOREM IPSUM</a>
                 <a href="#" class="text-xs font-semibold tracking-widest text-secondary hover:text-primary transition-colors duration-300">BACKGROUND</a>
                 <a href="#" class="text-xs font-semibold tracking-widest text-secondary hover:text-primary transition-colors duration-300">ABOUT</a>
-                <a href="#" class="text-xs font-semibold tracking-widest text-secondary hover:text-primary transition-colors duration-300">Contact</a>
             </div>
 
             <a href="https://www.motivumalkoto.hu" class="hidden md:inline-block bg-primary text-on-primary px-8 py-3 text-xs font-semibold tracking-widest hover:opacity-70 transition-opacity duration-300">
-                CONNECT
+                CONTACT
             </a>
 
             <button onclick="toggleMobileMenu()" class="md:hidden text-2xl text-primary focus:outline-none z-50">
@@ -148,10 +147,9 @@
 
         <!-- MOBIL LEGÖRDÜLŐ MENÜ -->
         <div id="mobile-menu" class="hidden fixed inset-0 bg-white/95 backdrop-blur-md flex flex-col justify-center items-center space-y-8 z-[200] transition-all duration-300">
-            <a href="#" class="text-lg font-semibold tracking-widest text-primary" onclick="toggleMobileMenu()">Gallery</a>
-            <a href="#" class="text-lg font-semibold tracking-widest text-secondary hover:text-primary" onclick="toggleMobileMenu()">Philosophy</a>
-            <a href="#" class="text-lg font-semibold tracking-widest text-secondary hover:text-primary" onclick="toggleMobileMenu()">Projects</a>
-            <a href="#" class="text-lg font-semibold tracking-widest text-secondary hover:text-primary" onclick="toggleMobileMenu()">Contact</a>
+            <a href="#" class="text-lg font-semibold tracking-widest text-primary" onclick="toggleMobileMenu()">LOREM IPSUM</a>
+            <a href="#" class="text-lg font-semibold tracking-widest text-secondary hover:text-primary" onclick="toggleMobileMenu()">BACKGROUND</a>
+            <a href="#" class="text-lg font-semibold tracking-widest text-secondary hover:text-primary" onclick="toggleMobileMenu()">ABOUT</a>
             <a href="https://www.motivumalkoto.hu" class="bg-primary text-on-primary px-10 py-4 text-sm font-semibold tracking-widest" onclick="toggleMobileMenu()">CONNECT</a>
         </div>
     </header>
@@ -184,7 +182,7 @@
             <div class="flex flex-wrap justify-center gap-6 md:gap-8">
                 <a href="#" class="font-label-sm text-label-sm text-secondary hover:text-primary transition-colors duration-200 hover-underline">Privacy Policy</a>
                 <a href="#" class="font-label-sm text-label-sm text-secondary hover:text-primary transition-colors duration-200 hover-underline">Terms of Service</a>
-                <a href="https://instagram.com" class="font-label-sm text-label-sm text-secondary hover:text-primary transition-colors duration-200 hover-underline">Instagram</a>
+                <a href="hhttps://www.instagram.com/motifcreator" class="font-label-sm text-label-sm text-secondary hover:text-primary transition-colors duration-200 hover-underline">Instagram</a>
             </div>
         </div>
     </footer>
@@ -197,18 +195,42 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // 1. KÉPEK BIZTONSÁGOS BEOLVASÁSA ÉS BETÖLTÉSE
-            document.querySelectorAll('.parallax-layer').forEach(layer => {
-                const imgPath = layer.getAttribute('data-image');
-                if (imgPath) {
+            const layersData = [
+                { id: 'layer-bg', baseSpeed: 0.25 }, // Lassabb háttér
+                { id: 'layer-fg', baseSpeed: 0.75 }  // Gyorsabb előtér
+            ];
+
+            const elements = layersData.map(layer => ({
+                el: document.getElementById(layer.id),
+                baseSpeed: layer.baseSpeed,
+                offset: 0
+            }));
+
+            // 1. KÉPEK BIZTONSÁGOS BEOLVASÁSA ÉS BETÖLTÉSE (Időzítés javítva!)
+            // Itt ígéreteket (Promises) használunk, hogy a kód bevárja az összes PNG betöltését
+            const loadImages = elements.map(item => {
+                return new Promise((resolve) => {
+                    if (!item.el) {
+                        resolve();
+                        return;
+                    }
+
+                    const imgPath = item.el.getAttribute('data-image');
+                    if (!imgPath) {
+                        resolve();
+                        return;
+                    }
+
                     const safeImgPath = encodeURI(imgPath);
                     const img = new Image();
+                    
                     img.onload = function() {
-                        layer.style.backgroundImage = `url("${safeImgPath}")`;
-                        layer.classList.add('loaded');
+                        item.el.style.backgroundImage = `url("${safeImgPath}")`;
+                        resolve(); // Jelezzük, hogy ez a kép sikeresen betöltött
                     };
+                    
                     img.onerror = function() {
-                        // Demo képek beöltése csak a szerkesztőfelületen, ha nem találja a helyi fájlt
+                        // Demo képek betöltése csak az online szerkesztőfelületen
                         let fallbackUrl = "";
                         if (imgPath.includes("backArtboard")) {
                             fallbackUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuATNwiJZK2P9MIrf-IpLqX9_ndRpH9cfg-dFnNggKTL_u4lBneEhvt7cUlaZW3O6CL0V1xpCa6PG576tvYuSTgasBwCCbqXQgNqmYnqWIptmX5D2UgKniRn86jkX1hEx_AlfySnv4M63pmW9CFx0obUZIpwh10zZ1cyd-HR_tFal4lhFtLcSNpL7QakyxLZJUgjAj4qFhCPwxJxPounf3oXw2VcVIqaSbpfneDgZAAQY8UioQePQ35aRs96Qz8HIhUIhrz_dHxtYCU";
@@ -216,25 +238,13 @@
                             fallbackUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuBVnULvVxUTxPzagdMnXIDZay-mmG8IrBq2t2TBsIeTE8ivjH1WLZ0hty5Crnqur8NzI5DXoOecwGs21RJo5YVuoRn24zyG5BocR8Jkj179AD-a1FMLjjd3vJXoS2KSlMOTz2OaPJgrvE9N-hX9ZEwiqZI1LFqQggicKKCDOZXX_VRhNf4g7WBa66MW9KJBO6qiLiBtYj2_3Z-JnYiurCo8RGdzyCl7wuEwYkUM5yJC9ftHt6OLh3UcGzOxHoQm5lwUfnoGfjjja7E";
                         }
                         if (fallbackUrl) {
-                            layer.style.backgroundImage = `url("${fallbackUrl}")`;
-                            layer.classList.add('loaded');
+                            item.el.style.backgroundImage = `url("${fallbackUrl}")`;
                         }
+                        resolve(); // Továbbengedjük a folyamatot hiba/fallback esetén is
                     }
                     img.src = safeImgPath; 
-                }
+                });
             });
-
-            // 2. PARALLAX MOZGÁS BEÁLLÍTÁSA
-            const layers = [
-                { id: 'layer-bg', baseSpeed: 0.25 }, // Lassabb háttér
-                { id: 'layer-fg', baseSpeed: 0.75 }  // Gyorsabb előtér
-            ];
-
-            const elements = layers.map(layer => ({
-                el: document.getElementById(layer.id),
-                baseSpeed: layer.baseSpeed,
-                offset: 0
-            }));
 
             // Dinamikus változók a mozgáshoz és a turbó funkcióhoz
             let targetDirection = 1;
@@ -242,6 +252,19 @@
             let targetSpeedMultiplier = 1;
             let currentSpeedMultiplier = 1;
             const ease = 0.05; // Mennyire legyen sima az átmenet
+
+            // 2. PARALLAX INDÍTÁSA CSAK A KÉPEK BETÖLTÉSE UTÁN
+            Promise.all(loadImages).then(() => {
+                // Ha minden kép betöltött (vagy a fallback aktiválódott), megjelenítjük őket
+                elements.forEach(item => {
+                    if (item.el) {
+                        item.el.classList.add('loaded');
+                    }
+                });
+
+                // Csak ezután indítjuk a folyamatos mozgást
+                animate();
+            });
 
             // Interakció: Turbó gyorsító sávok a két szélen (200px)
             document.addEventListener('mousemove', (e) => {
@@ -279,8 +302,6 @@
                 
                 requestAnimationFrame(animate);
             }
-
-            animate(); // Start
         });
 
         // 3. MOBIL MENÜ KEZELÉSE (Teljes képernyős)
