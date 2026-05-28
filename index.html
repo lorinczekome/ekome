@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="scroll-smooth" lang="hu">
+<html class="scroll-smooth" lang="hu" style="background-color: #f9f9f9;">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>MOTIVUMALKOTÓ</title>
+    <title>MOTÍVUMALKOTÓ</title>
     
     <!-- Tailwind CSS keretrendszer betöltése -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -21,48 +21,46 @@
             src: url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap');
         }
 
-        body {
-            background-color: #f9f9f9;
+        /* * BIZTONSÁGI HÁTTÉRSZÍNEK: 
+         * Ez garantálja, hogy delay vagy hiba esetén is soha ne lehessen piros a háttér!
+         */
+        body, html {
+            background-color: #f9f9f9 !important;
             margin: 0;
             padding: 0;
         }
 
-        /* A parallax konténer most már csak kitölti a maradék helyet a fejléc és a lábléc között */
         .parallax-wrapper {
             position: relative;
             width: 100%;
             overflow: hidden;
-            background: #f9f9f9;
+            background-color: #f9f9f9 !important;
         }
 
-        /* A parallax rétegek alapbeállításai */
         .parallax-layer {
             position: absolute;
             top: 0;
             left: 0;
             height: 100%;
             width: 100%;
-            background-size: auto 100%; /* A képet mindig hozzáigazítja a konténer magasságához */
+            background-size: auto 100%;
             background-position: bottom left;
             background-repeat: repeat-x;
+            background-color: transparent !important; /* Tiltja a hibás színmegjelenítést */
             will-change: background-position;
+            opacity: 0;
         }
 
         .layer-bg { z-index: 10; }
         .layer-fg { z-index: 30; }
 
-        /* A JS ezt a class-t teszi rá, ha a kép betöltődött. */
         .parallax-layer.loaded {
             opacity: 1;
-            transition: opacity 0.5s ease-in;
-        }
-        
-        .parallax-layer {
-            opacity: 0;
+            transition: opacity 0.8s ease-in; /* Kicsit lágyabb, elegánsabb beúszás */
         }
 
         .font-montserrat {
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Montserrat', sans-serif !important;
         }
 
         /* Link aláhúzás animáció */
@@ -90,6 +88,7 @@
     </style>
 
     <script id="tailwind-config">
+        /* Teljes Tailwind konfiguráció a tökéletes méretekért */
         tailwind.config = {
           darkMode: "class",
           theme: {
@@ -104,23 +103,28 @@
                       "margin-x": "64px", "container-max": "1280px"
               },
               "fontFamily": {
-                      "body-md": ["hankenGrotesk"], "label-sm": ["hankenGrotesk"]
+                      "body-md": ["hankenGrotesk"]
+              },
+              "fontSize": {
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "display-lg": ["80px", {"lineHeight": "96px", "letterSpacing": "-0.04em", "fontWeight": "300"}],
+                      "headline-md": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                      "body-lg": ["20px", {"lineHeight": "32px", "fontWeight": "400"}]
               }
             },
           },
         }
     </script>
 </head>
-<!-- A flex, flex-col és h-screen biztosítja, hogy minden pontosan egy képernyőnyit foglaljon el, görgetés nélkül -->
-<body class="font-body-md text-on-background selection:bg-primary selection:text-white flex flex-col h-screen overflow-hidden">
+
+<body class="font-body-md text-on-background selection:bg-primary selection:text-white flex flex-col h-screen overflow-hidden" style="background-color: #f9f9f9;">
 
     <!-- 
         ========================================================================
-        1. FEJLÉC ÉS NAVIGÁCIÓ (Kisebb magasság, parallax-on kívül)
+        1. FEJLÉC ÉS NAVIGÁCIÓ
         ========================================================================
     -->
     <header class="bg-surface border-b border-border-subtle z-[100] font-montserrat flex-shrink-0">
-        <!-- py-5 (20px) lett a korábbi py-8 (32px) helyett -> kb 2/3 magasság -->
         <nav class="flex justify-between items-center w-full px-6 md:px-margin-x py-5 max-w-container-max mx-auto">
             
             <div class="flex items-center gap-3">
@@ -131,13 +135,12 @@
             </div>
 
             <div class="hidden md:flex items-center gap-10">
-                <a href="#" class="text-xs font-semibold tracking-widest text-primary border-b border-primary pb-1">LOREM IPSUM</a>
-                <a href="#" class="text-xs font-semibold tracking-widest text-secondary hover:text-primary transition-colors duration-300">BACKGROUND</a>
-                <a href="#" class="text-xs font-semibold tracking-widest text-secondary hover:text-primary transition-colors duration-300">ABOUT</a>
+                <a href="https://motivumalkoto.hu/about" class="text-xs font-semibold tracking-widest text-secondary hover:text-primary transition-colors duration-300">BACKGROUND</a>
+                <a href="https://motivumalkoto.hu/gallery" class="text-xs font-semibold tracking-widest text-secondary hover:text-primary transition-colors duration-300">ABOUT</a>
             </div>
 
             <a href="https://www.motivumalkoto.hu" class="hidden md:inline-block bg-primary text-on-primary px-8 py-3 text-xs font-semibold tracking-widest hover:opacity-70 transition-opacity duration-300">
-                CONTACT
+                MOTIVUMALKOTÓ
             </a>
 
             <button onclick="toggleMobileMenu()" class="md:hidden text-2xl text-primary focus:outline-none z-50">
@@ -147,42 +150,38 @@
 
         <!-- MOBIL LEGÖRDÜLŐ MENÜ -->
         <div id="mobile-menu" class="hidden fixed inset-0 bg-white/95 backdrop-blur-md flex flex-col justify-center items-center space-y-8 z-[200] transition-all duration-300">
-            <a href="#" class="text-lg font-semibold tracking-widest text-primary" onclick="toggleMobileMenu()">LOREM IPSUM</a>
             <a href="#" class="text-lg font-semibold tracking-widest text-secondary hover:text-primary" onclick="toggleMobileMenu()">BACKGROUND</a>
             <a href="#" class="text-lg font-semibold tracking-widest text-secondary hover:text-primary" onclick="toggleMobileMenu()">ABOUT</a>
-            <a href="https://www.motivumalkoto.hu" class="bg-primary text-on-primary px-10 py-4 text-sm font-semibold tracking-widest" onclick="toggleMobileMenu()">CONNECT</a>
+            <a href="https://www.motivumalkoto.hu" class="bg-primary text-on-primary px-10 py-4 text-sm font-semibold tracking-widest" onclick="toggleMobileMenu()">MOTÍVUMALKOTÓ</a>
         </div>
     </header>
 
     <!-- 
         ========================================================================
-        2. PARALLAX CANVAS (flex-1: kitölti a maradék helyet a fejléc és lábléc közt)
+        2. PARALLAX CANVAS
         ========================================================================
     -->
     <main class="parallax-wrapper flex-1">
-        
         <div class="parallax-layer layer-bg" id="layer-bg" data-image="MotivumCsapat_backArtboard 1.png"></div>
         <div class="parallax-layer layer-fg" id="layer-fg" data-image="MotivumCsapat_frontArtboard 1.png"></div>
-
     </main>
 
     <!-- 
         ========================================================================
-        3. LÁBLÉC (Fele magasság, parallax-on kívül)
+        3. LÁBLÉC (Montserrat betűtípussal)
         ========================================================================
     -->
-    <footer class="bg-surface border-t border-border-subtle relative z-50 flex-shrink-0">
-        <!-- py-3 (12px) lett a korábbi py-6 / 24px helyett -> fele magasság -->
+    <footer class="bg-surface border-t border-border-subtle relative z-50 flex-shrink-0 font-montserrat">
         <div class="flex flex-col md:flex-row justify-between items-center w-full px-6 md:px-margin-x py-3 max-w-container-max mx-auto text-center md:text-left gap-2">
             
-            <div class="font-label-sm text-label-sm text-secondary tracking-widest uppercase">
+            <div class="text-[11px] md:text-xs font-semibold text-secondary tracking-widest uppercase">
                 © 2026 MOTIVUMALKOTÓ. ALL RIGHTS RESERVED.
             </div>
             
             <div class="flex flex-wrap justify-center gap-6 md:gap-8">
-                <a href="#" class="font-label-sm text-label-sm text-secondary hover:text-primary transition-colors duration-200 hover-underline">Privacy Policy</a>
-                <a href="#" class="font-label-sm text-label-sm text-secondary hover:text-primary transition-colors duration-200 hover-underline">Terms of Service</a>
-                <a href="hhttps://www.instagram.com/motifcreator" class="font-label-sm text-label-sm text-secondary hover:text-primary transition-colors duration-200 hover-underline">Instagram</a>
+                <a href="#" class="text-[11px] md:text-xs font-semibold text-secondary hover:text-primary transition-colors duration-200 hover-underline uppercase tracking-widest">Privacy Policy</a>
+                <a href="#" class="text-[11px] md:text-xs font-semibold text-secondary hover:text-primary transition-colors duration-200 hover-underline uppercase tracking-widest">Terms of Service</a>
+                <a href="https://www.instagram.com/motifcreator" class="text-[11px] md:text-xs font-semibold text-secondary hover:text-primary transition-colors duration-200 hover-underline uppercase tracking-widest">Instagram</a>
             </div>
         </div>
     </footer>
@@ -196,8 +195,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             
             const layersData = [
-                { id: 'layer-bg', baseSpeed: 0.25 }, // Lassabb háttér
-                { id: 'layer-fg', baseSpeed: 0.75 }  // Gyorsabb előtér
+                { id: 'layer-bg', baseSpeed: 0.25 },
+                { id: 'layer-fg', baseSpeed: 0.75 }
             ];
 
             const elements = layersData.map(layer => ({
@@ -206,8 +205,7 @@
                 offset: 0
             }));
 
-            // 1. KÉPEK BIZTONSÁGOS BEOLVASÁSA ÉS BETÖLTÉSE (Időzítés javítva!)
-            // Itt ígéreteket (Promises) használunk, hogy a kód bevárja az összes PNG betöltését
+            // 1. KÉPEK BIZTONSÁGOS BEOLVASÁSA ÉS BETÖLTÉSE
             const loadImages = elements.map(item => {
                 return new Promise((resolve) => {
                     if (!item.el) {
@@ -226,75 +224,61 @@
                     
                     img.onload = function() {
                         item.el.style.backgroundImage = `url("${safeImgPath}")`;
-                        resolve(); // Jelezzük, hogy ez a kép sikeresen betöltött
+                        resolve(); 
                     };
                     
                     img.onerror = function() {
-                        // Demo képek betöltése csak az online szerkesztőfelületen
-                        let fallbackUrl = "";
-                        if (imgPath.includes("backArtboard")) {
-                            fallbackUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuATNwiJZK2P9MIrf-IpLqX9_ndRpH9cfg-dFnNggKTL_u4lBneEhvt7cUlaZW3O6CL0V1xpCa6PG576tvYuSTgasBwCCbqXQgNqmYnqWIptmX5D2UgKniRn86jkX1hEx_AlfySnv4M63pmW9CFx0obUZIpwh10zZ1cyd-HR_tFal4lhFtLcSNpL7QakyxLZJUgjAj4qFhCPwxJxPounf3oXw2VcVIqaSbpfneDgZAAQY8UioQePQ35aRs96Qz8HIhUIhrz_dHxtYCU";
-                        } else if (imgPath.includes("frontArtboard")) {
-                            fallbackUrl = "https://lh3.googleusercontent.com/aida-public/AB6AXuBVnULvVxUTxPzagdMnXIDZay-mmG8IrBq2t2TBsIeTE8ivjH1WLZ0hty5Crnqur8NzI5DXoOecwGs21RJo5YVuoRn24zyG5BocR8Jkj179AD-a1FMLjjd3vJXoS2KSlMOTz2OaPJgrvE9N-hX9ZEwiqZI1LFqQggicKKCDOZXX_VRhNf4g7WBa66MW9KJBO6qiLiBtYj2_3Z-JnYiurCo8RGdzyCl7wuEwYkUM5yJC9ftHt6OLh3UcGzOxHoQm5lwUfnoGfjjja7E";
-                        }
-                        if (fallbackUrl) {
-                            item.el.style.backgroundImage = `url("${fallbackUrl}")`;
-                        }
-                        resolve(); // Továbbengedjük a folyamatot hiba/fallback esetén is
-                    }
+                        console.warn("Helyi fájl nem található, átlátszó marad:", imgPath);
+                        item.el.style.backgroundColor = "transparent";
+                        resolve(); 
+                    };
+                    
                     img.src = safeImgPath; 
                 });
             });
 
-            // Dinamikus változók a mozgáshoz és a turbó funkcióhoz
+            // Dinamikus változók a mozgáshoz
             let targetDirection = 1;
             let currentDirection = 1;
             let targetSpeedMultiplier = 1;
             let currentSpeedMultiplier = 1;
-            const ease = 0.05; // Mennyire legyen sima az átmenet
+            const ease = 0.05;
 
-            // 2. PARALLAX INDÍTÁSA CSAK A KÉPEK BETÖLTÉSE UTÁN
+            // 2. PARALLAX INDÍTÁSA
             Promise.all(loadImages).then(() => {
-                // Ha minden kép betöltött (vagy a fallback aktiválódott), megjelenítjük őket
                 elements.forEach(item => {
                     if (item.el) {
                         item.el.classList.add('loaded');
                     }
                 });
-
-                // Csak ezután indítjuk a folyamatos mozgást
                 animate();
             });
 
-            // Interakció: Turbó gyorsító sávok a két szélen (200px)
+            // Interakció: Turbó gyorsító sávok
             document.addEventListener('mousemove', (e) => {
                 const w = window.innerWidth;
-                const edgeZoneWidth = 200; // A gyorsító sáv szélessége (pixel)
+                const edgeZoneWidth = 200;
 
-                // Irány meghatározása (Képernyő bal fele = balra mozog, jobb fele = jobbra mozog)
                 if (e.clientX < w / 2) {
                     targetDirection = -1; 
                 } else {
                     targetDirection = 1;
                 }
 
-                // Sebesség meghatározása (Ha az egerünk a szélén lévő 200px sávba ér, 4x-es gyorsítás)
                 if (e.clientX < edgeZoneWidth || e.clientX > w - edgeZoneWidth) {
-                    targetSpeedMultiplier = 4; // 4x sebesség
+                    targetSpeedMultiplier = 4;
                 } else {
-                    targetSpeedMultiplier = 1; // 1x normál sebesség
+                    targetSpeedMultiplier = 1;
                 }
             });
 
             // Folyamatos animációs hurok
             function animate() {
-                // Finom átmenet számolása (smooth damping) mind az irányra, mind a sebességre
                 currentDirection += (targetDirection - currentDirection) * ease;
                 currentSpeedMultiplier += (targetSpeedMultiplier - currentSpeedMultiplier) * ease;
 
                 elements.forEach(item => {
                     if (item.el) {
-                        // Irány és sebességszorzó együttes alkalmazása
                         item.offset += item.baseSpeed * currentDirection * currentSpeedMultiplier;
                         item.el.style.backgroundPositionX = `${item.offset}px`;
                     }
@@ -304,7 +288,7 @@
             }
         });
 
-        // 3. MOBIL MENÜ KEZELÉSE (Teljes képernyős)
+        // 3. MOBIL MENÜ KEZELÉSE
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
             const icon = document.getElementById('menu-icon');
