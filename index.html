@@ -51,9 +51,9 @@
         #mobile-menu.open { right: 0; }
 
         /* X ikon animáció */
-        .hamburger.active div:nth-child(1) { transform: rotate(45deg) translate(7px, 6px); background: #fff; }
+        .hamburger.active div:nth-child(1) { transform: rotate(45deg) translate(7px, 6px); }
         .hamburger.active div:nth-child(2) { opacity: 0; }
-        .hamburger.active div:nth-child(3) { transform: rotate(-45deg) translate(7px, -6px); background: #fff; }
+        .hamburger.active div:nth-child(3) { transform: rotate(-45deg) translate(7px, -6px); }
 
         .mobile-nav-link { text-decoration: none !important; color: #E8E8E8; font-size: 18px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; }
         .nav-link { text-decoration: none !important; font-size: 14px; font-weight: 600; color: #5e5e5e; text-transform: uppercase; transition: opacity 0.3s ease; }
@@ -68,6 +68,10 @@
         .btn-primary:hover { 
             background: #333; color: #ffffff; border-radius: 12px; 
             padding: 16px 32px; /* 4-4 px növelés alul-felül */
+        }
+
+        #mobile-menu .btn-primary {
+            border: 1px solid #888888; /* Középszürke outline csak a mobil menüben */
         }
 
         main { flex-grow: 1; position: relative; overflow: hidden; background-color: #f9f9f9; }
@@ -127,7 +131,7 @@
         }
 
         // 2. Szó rotáló animáció a fejlécben
-        const suffixWords = ['LÉNYEK', 'SZELLEMEK', 'EMBEREK', 'ANGYALOK'];
+        const suffixWords = ['LÉNYEK', 'SZELLEMEK', 'EMBEREK', 'ANGYALOK', 'ASSZONYOK', 'BETYÁROK', 'FÉRFIAK', 'SZERETŐK', 'CSECSEMŐK', 'ISTENEK', 'GYEREKEK', 'ARCOK'];
         let currentWordIndex = 0;
         const suffixElement = document.getElementById('logo-suffix');
 
@@ -218,33 +222,34 @@
 
             mainContainer.appendChild(el);
 
-            // Random kiindulási adatok
-            const scale = gsap.utils.random(0.8, 1.6); // Méret 0.8x és 1.6x között
-            
-            // Pozicionálási logika a méret alapján
-            let startY;
-            if (scale <= 1.2) {
-                // Ha a méret 0.8 és 1.2 között van, az alsó 1/4-ben (kb. 75-95% között) jelenjen meg
-                startY = gsap.utils.random(75, 95);
-            } else {
-                // Ha nagyobb, akkor lehet feljebb is, de a felső 20%-ot elkerülve (20-95% között)
-                startY = gsap.utils.random(20, 95);
+            // Magasság beállítása (min 700px, max 1300px, de sosem nagyobb a képernyő magasságánál mínusz menü)
+            let svgHeight = gsap.utils.random(700, 1300);
+            const maxAvailableHeight = window.innerHeight - 80; // 80px a menü magassága
+            if (svgHeight > maxAvailableHeight) {
+                svgHeight = maxAvailableHeight;
             }
             
-            const startX = gsap.utils.random(10, 80); // Vízszintes helyzet (%)
-            const direction = Math.random() > 0.5 ? 1 : -1; // 1 = Jobbra, -1 = Balra
-            const moveDistance = gsap.utils.random(80, 250); // Mozgás hossza (px) - kisebb és lassabb
-            const moveDuration = gsap.utils.random(3, 4); // Időtartam: 3-4 mp a képernyőn
-            const fadeDuration = 0.2; // Nagyon gyors be/ki villanás
+            const direction = Math.random() > 0.5 ? 1 : -1; // 1 = balról jön be, -1 = jobbról jön be
+            
+            // "Bekukucskálós" mozgás relatív értékekkel (xPercent) a képernyő széléhez képest
+            const startXPercent = direction === 1 ? -150 : 50; 
+            const targetXPercent = direction === 1 ? gsap.utils.random(-20, 30) : gsap.utils.random(-130, -80);
+            const horizontalAnchor = direction === 1 ? "0%" : "100%";
+            
+            const stayDuration = gsap.utils.random(3, 4); // 3-4 mp-ig marad a képernyőn
+            const slideDuration = 2.5; // Lassabb becsúszás és kicsúszás sebessége (ease-in-out)
 
-            // Elem kezdeti pozíciója (láthatatlanul, forgatás nélkül)
+            // Elem kezdeti pozíciója (képernyőn kívül, fix méret, nincs fade, nincs forgatás)
             gsap.set(el, {
-                top: `${startY}%`,
-                left: `${startX}%`,
-                scale: scale,
-                opacity: 0,
-                xPercent: -50,
-                yPercent: -50
+                bottom: "0px", // Mindig a képernyő alsó vonalához igazítva
+                left: horizontalAnchor,
+                height: `${svgHeight}px`,
+                width: 'auto',
+                opacity: 1, // Fixen látható (nincs fade)
+                xPercent: startXPercent,
+                yPercent: 0, 
+                rotation: 0, // Teljesen vertikális marad
+                transformOrigin: "bottom center"
             });
 
             // Animációs idővonal létrehozása
@@ -257,14 +262,64 @@
                 }
             });
 
-            // Animáció: Mozgás folyamatosan a kijelölt idő alatt (3-4s), be- és kilépéskor gyors áttűnés
-            tl.to(el, { x: `+=${direction * moveDistance}`, duration: moveDuration, ease: "none" }, 0)
-              .to(el, { opacity: 1, duration: fadeDuration, ease: "power1.inOut" }, 0)
-              .to(el, { opacity: 0, duration: fadeDuration, ease: "power1.inOut" }, moveDuration - fadeDuration);
+            // Animáció: Csak az xPercent változik (ease-in-out), így méret/átlátszóság nem módosul
+            tl.to(el, { xPercent: targetXPercent, duration: slideDuration, ease: "power2.inOut" })
+              .to(el, { xPercent: startXPercent, duration: slideDuration, ease: "power2.inOut" }, `+=${stayDuration}`);
         }
 
         // Kezdeti indítás
         setTimeout(spawnRandomSvg, 500);
+
+        // 5. Különleges felülről bekukucskáló SVG logikája
+        function spawnTopPeekerSvg() {
+            const mainContainer = document.getElementById('main-container');
+            const el = document.createElement('img');
+            
+            // Fix különleges fájl
+            el.src = '74.150.1_vektor_01_jav.svg';
+            el.className = 'floating-svg';
+            el.style.zIndex = 40; // Ez is legyen legelöl
+
+            mainContainer.appendChild(el);
+
+            const mainHeight = window.innerHeight - 80;
+            let peekerHeight = gsap.utils.random(500, 1000); // Kellemes méret
+            if (peekerHeight > mainHeight) peekerHeight = mainHeight;
+
+            // Kezdeti pozíció (menü alatt, de yPercent: -100 miatt láthatatlanul a main-container tetején túl van)
+            gsap.set(el, {
+                top: 0,
+                left: `${gsap.utils.random(10, 90)}%`, // Random vízszintes helyzet (jobb, bal, közép)
+                height: `${peekerHeight}px`,
+                width: 'auto',
+                xPercent: -50,
+                yPercent: -100, 
+                y: 0,
+                opacity: 1,
+                rotation: 0
+            });
+
+            // Maximum a 3/4-e látszódhat, és nem mehet a képernyő felénél lejjebb
+            const maxVisiblePixels = Math.min(peekerHeight * 0.75, mainHeight / 2);
+            
+            const stayDuration = gsap.utils.random(2, 3); // 2-3 mp-ig marad
+            const slideDuration = 2.5; // Kellemes, lassú ease-in-out
+
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    el.remove();
+                    // Újraindítás 10-20 másodperc múlva
+                    setTimeout(spawnTopPeekerSvg, gsap.utils.random(10000, 20000));
+                }
+            });
+
+            // Animáció: y tengelyen elmozdítjuk lefelé (pixelekben), majd vissza
+            tl.to(el, { y: maxVisiblePixels, duration: slideDuration, ease: "power2.inOut" })
+              .to(el, { y: 0, duration: slideDuration, ease: "power2.inOut" }, `+=${stayDuration}`);
+        }
+
+        // A felülről érkező elem első indítása (10-20 másodperc között)
+        setTimeout(spawnTopPeekerSvg, gsap.utils.random(10000, 20000));
     </script>
 </body>
 </html>
