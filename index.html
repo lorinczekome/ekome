@@ -271,19 +271,24 @@
         setTimeout(spawnRandomSvg, 500);
 
         // 5. Különleges felülről bekukucskáló SVG logikája
+        const topPeekerFiles = [
+            '74.150.1_vektor_01_jav.svg',
+            '2023.80.12_C_vektor_01_arc.svg'
+        ];
+
         function spawnTopPeekerSvg() {
             const mainContainer = document.getElementById('main-container');
             const el = document.createElement('img');
             
-            // Fix különleges fájl
-            el.src = '74.150.1_vektor_01_jav.svg';
+            // Véletlenszerűen választ a felülről érkező fájlok közül
+            el.src = topPeekerFiles[Math.floor(Math.random() * topPeekerFiles.length)];
             el.className = 'floating-svg';
             el.style.zIndex = 40; // Ez is legyen legelöl
 
             mainContainer.appendChild(el);
 
             const mainHeight = window.innerHeight - 80;
-            let peekerHeight = gsap.utils.random(500, 1000); // Kellemes méret
+            let peekerHeight = gsap.utils.random(250, 500); // Feleakkora méret (250-500px)
             if (peekerHeight > mainHeight) peekerHeight = mainHeight;
 
             // Kezdeti pozíció (menü alatt, de yPercent: -100 miatt láthatatlanul a main-container tetején túl van)
@@ -308,7 +313,7 @@
             const tl = gsap.timeline({
                 onComplete: () => {
                     el.remove();
-                    // Újraindítás 10-20 másodperc múlva
+                    // Újraindítás 10-20 másodperc múlva (garantálja, hogy sosem jelennek meg egyszerre)
                     setTimeout(spawnTopPeekerSvg, gsap.utils.random(10000, 20000));
                 }
             });
