@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>MOTÍVUMALKOTÓ</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet"/>
+    <!-- Betöltjük a 400, 500, 600 és a 700-as Montserrat verziót is -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
     <style>
@@ -21,11 +22,12 @@
             height: 80px; display: flex; justify-content: space-between; align-items: center;
             padding: 0 32px; border-bottom: 1px solid #E5E5E5; background-color: #f9f9f9;
             flex-shrink: 0; z-index: 1000;
+            transition: height 0.3s ease;
         }
 
         .logo-text { 
-            font-size: 20px; font-weight: 500; 
-            display: flex; align-items: center;
+            font-size: 20px; font-weight: 500; /* Vékonyabb (500-as) betű */
+            display: flex; align-items: center; flex-direction: row; gap: 6px;
         }
         
         #logo-suffix {
@@ -37,8 +39,14 @@
         .hamburger div { width: 25px; height: 2px; background: #000; transition: all 0.3s; }
 
         @media (max-width: 900px) {
+            header { height: 100px; } /* Vastagabb fejléc mobilon */
             .nav-container { display: none; }
             .hamburger { display: flex; }
+            
+            .logo-text { 
+                flex-direction: column; align-items: flex-start; justify-content: center; 
+                gap: 2px; font-size: 16px; /* 2 soros megjelenítés, picit kisebb betűvel, hogy jól elférjen */
+            }
         }
 
         /* Slide-in animáció a mobil menünek */
@@ -50,7 +58,7 @@
         }
         #mobile-menu.open { right: 0; }
 
-        /* X ikon animáció */
+        /* X ikon animáció - marad fekete */
         .hamburger.active div:nth-child(1) { transform: rotate(45deg) translate(7px, 6px); }
         .hamburger.active div:nth-child(2) { opacity: 0; }
         .hamburger.active div:nth-child(3) { transform: rotate(-45deg) translate(7px, -6px); }
@@ -93,7 +101,8 @@
 
     <header>
         <div class="logo-text">
-            <span>MOTÍVUM</span><span id="logo-suffix">LÉNYEK</span>
+            <span>BEMUTATKOZNAK A</span>
+            <span>MOTÍVUM<span id="logo-suffix">LÉNYEK</span></span>
         </div>
         <div class="nav-container">
             <a href="https://neprajz.hu/hirek/2022/keszits-sajat-designt-a-neprajzi-muzeum-uj-alkalmazasaval.html" target="_blank" rel="noopener noreferrer" class="nav-link">A PROJEKTRŐL</a>
@@ -131,7 +140,12 @@
         }
 
         // 2. Szó rotáló animáció a fejlécben
-        const suffixWords = ['LÉNYEK', 'SZELLEMEK', 'EMBEREK', 'ANGYALOK', 'ASSZONYOK', 'BETYÁROK', 'FÉRFIAK', 'SZERETŐK', 'CSECSEMŐK', 'ISTENEK', 'GYEREKEK', 'ARCOK'];
+        const suffixWords = [
+            'LÉNYEK', 'SZELLEMEK', 'EMBEREK', 'ANGYALOK', 
+            'ASSZONYOK', 'BETYÁROK', 'FÉRFIAK', 'SZERETŐK', 
+            'CSECSEMŐK', 'ISTENEK', 'GYEREKEK', 'ARCOK',
+            'HUSZÁROK', 'LEÁNYOK', 'MISKÁK', 'ÖRDÖGÖK'
+        ];
         let currentWordIndex = 0;
         const suffixElement = document.getElementById('logo-suffix');
 
@@ -194,13 +208,15 @@
         const svgFiles = [
             '12510_vektor_01.svg',
             '43342_vektor_01.svg',
-            '43860_B_vektor_01.svg',
             'NM_81.137.1_vektor_01.svg',
             '130864_A_vektor_01.svg',
             '37766.svg',
             '121719_A_vektor_02.svg',
             '134432_A_vektor_01.svg',
-            '129517_vektor_01_asset.svg'
+            '129517_vektor_01_asset.svg',
+            '71.30.134_vektor_01_variacio.svg',
+            '94.17.1_vektor_01_variacio.svg',
+            '32041_A_vektor_01_variacio.svg'
         ];
 
         let activeSvgCount = 0;
@@ -214,7 +230,8 @@
             const el = document.createElement('img');
             
             // Random fájl kiválasztása
-            el.src = svgFiles[Math.floor(Math.random() * svgFiles.length)];
+            const chosenSvg = svgFiles[Math.floor(Math.random() * svgFiles.length)];
+            el.src = chosenSvg;
             el.className = 'floating-svg';
 
             // Z-index: Mindig legelöl, a PNG-k (10, 30) előtt
@@ -222,14 +239,22 @@
 
             mainContainer.appendChild(el);
 
+            // Dinamikus magasság-számítás a fejléc vastagsága alapján
+            const headerHeight = document.querySelector('header').offsetHeight;
+
             // Magasság beállítása (min 700px, max 1300px, de sosem nagyobb a képernyő magasságánál mínusz menü)
             let svgHeight = gsap.utils.random(700, 1300);
-            const maxAvailableHeight = window.innerHeight - 80; // 80px a menü magassága
+            const maxAvailableHeight = window.innerHeight - headerHeight;
             if (svgHeight > maxAvailableHeight) {
                 svgHeight = maxAvailableHeight;
             }
             
-            const direction = Math.random() > 0.5 ? 1 : -1; // 1 = balról jön be, -1 = jobbról jön be
+            let direction = Math.random() > 0.5 ? 1 : -1; // 1 = balról jön be, -1 = jobbról jön be
+            
+            // Különleges szabály: a 130864_A_vektor_01.svg kizárólag jobbról érkezhet
+            if (chosenSvg === '130864_A_vektor_01.svg') {
+                direction = -1;
+            }
             
             // "Bekukucskálós" mozgás relatív értékekkel (xPercent) a képernyő széléhez képest
             const startXPercent = direction === 1 ? -150 : 50; 
@@ -273,7 +298,11 @@
         // 5. Különleges felülről bekukucskáló SVG logikája
         const topPeekerFiles = [
             '74.150.1_vektor_01_jav.svg',
-            '2023.80.12_C_vektor_01_arc.svg'
+            '2023.80.12_C_vektor_01_arc.svg',
+            '43860_B_vektor_01.svg',
+            '13447_vektor_01_variacio.svg',
+            '65.113.3_01_variacio.svg',
+            '2020.18.10_vektor_01_variacio.svg'
         ];
 
         function spawnTopPeekerSvg() {
@@ -287,7 +316,8 @@
 
             mainContainer.appendChild(el);
 
-            const mainHeight = window.innerHeight - 80;
+            const headerHeight = document.querySelector('header').offsetHeight;
+            const mainHeight = window.innerHeight - headerHeight;
             let peekerHeight = gsap.utils.random(250, 500); // Feleakkora méret (250-500px)
             if (peekerHeight > mainHeight) peekerHeight = mainHeight;
 
