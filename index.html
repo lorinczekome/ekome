@@ -85,6 +85,15 @@
         main { flex-grow: 1; position: relative; overflow: hidden; background-color: #f9f9f9; }
         .parallax-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center bottom; background-repeat: repeat-x; }
 
+        /* Dombos minimalista háttér - 3 különböző magasságú domb */
+        #hills-container {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; z-index: 5; pointer-events: none; overflow: hidden;
+        }
+        .hill { position: absolute; background-color: #e8e8e8; border-radius: 50%; }
+        .hill-1 { width: 150vw; height: 100vh; left: -30vw; top: 40%; } /* Közepes, bal oldali */
+        .hill-2 { width: 120vw; height: 130vh; left: 15vw; top: 20%; }  /* Magas, középső */
+        .hill-3 { width: 160vw; height: 80vh; left: 45vw; top: 55%; }   /* Alacsonyabb, lankás jobb oldali */
+
         /* Lebegő SVG vektorok alapstílusa */
         .floating-svg {
             position: absolute;
@@ -119,6 +128,13 @@
     </div>
 
     <main id="main-container">
+        <!-- Minimalista dombok (z-index: 5) -->
+        <div id="hills-container">
+            <div class="hill hill-1"></div>
+            <div class="hill hill-2"></div>
+            <div class="hill hill-3"></div>
+        </div>
+        
         <!-- Háttér PNG (z-index: 10) -->
         <div class="parallax-layer" id="layer-bg" style="background-image: url('MotivumCsapat_backArtboard 1.png'); z-index: 10;"></div>
         <!-- Előtér PNG (z-index: 30) -->
@@ -150,24 +166,19 @@
         const suffixElement = document.getElementById('logo-suffix');
 
         function animateSuffix() {
-            // Új véletlenszerű szó választása, ami biztosan nem a jelenlegi
             let nextIndex = currentWordIndex;
             while (nextIndex === currentWordIndex) {
                 nextIndex = Math.floor(Math.random() * suffixWords.length);
             }
             currentWordIndex = nextIndex;
 
-            // Felfelé eltűnik
             gsap.to(suffixElement, {
                 y: -15, opacity: 0, duration: 0.3, ease: "power2.in", onComplete: () => {
-                    // Szó csere és lentre helyezés
                     suffixElement.innerText = suffixWords[currentWordIndex];
                     gsap.set(suffixElement, { y: 15 });
                     
-                    // Felfelé megjelenik
                     gsap.to(suffixElement, {
                         y: 0, opacity: 1, duration: 0.3, ease: "power2.out", onComplete: () => {
-                            // 1.5 másodperces várakozás a következő forgatásig
                             setTimeout(animateSuffix, 1500);
                         }
                     });
@@ -175,7 +186,6 @@
             });
         }
         
-        // Animáció elindítása 1.5 másodperc múlva
         setTimeout(animateSuffix, 1500);
 
 
@@ -185,23 +195,63 @@
         let mouseX = 0;
         let currentPos = 0;
 
+        // Proximity (Távolság alapú nagyítás) egerének koordinátái
+        let mouseXpx = -1000; 
+        let mouseYpx = -1000;
+
         window.addEventListener('mousemove', (e) => {
             mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseXpx = e.clientX;
+            mouseYpx = e.clientY;
         });
 
         let frame = 0;
         gsap.ticker.add(() => {
             frame++;
             if (window.innerWidth < 900) {
-                // Mobil: Egyirányú automatikus parallax mozgás
-                gsap.set(bg, { backgroundPositionX: (frame * 0.5) + "px" });
-                gsap.set(fg, { backgroundPositionX: (frame * 1.5) + "px" });
+                // Tovább lassított automatikus mozgás
+                gsap.set(bg, { backgroundPositionX: (frame * 0.35) + "px" });
+                gsap.set(fg, { backgroundPositionX: (frame * 1.05) + "px" });
             } else {
-                // Desktop/Tablet: Egérvezérelt interaktív parallax mozgás
-                currentPos += mouseX * 3;
+                // Tovább lassított egérkövető mozgás
+                currentPos += mouseX * 2.15;
                 gsap.set(bg, { backgroundPositionX: currentPos * 0.2 + "px" });
                 gsap.set(fg, { backgroundPositionX: currentPos * 0.8 + "px" });
             }
+
+            // --- PROXIMITY PULSE EFFEKT ---
+            const svgs = document.querySelectorAll('.floating-svg');
+            const triggerDist = 200; // Hatósugár pixelben
+
+            svgs.forEach(svg => {
+                const rect = svg.getBoundingClientRect();
+                
+                // Távolság kiszámítása az SVG befoglaló dobozának a legközelebbi pontjától
+                const dx = Math.max(rect.left - mouseXpx, 0, mouseXpx - rect.right);
+                const dy = Math.max(rect.top - mouseYpx, 0, mouseYpx - rect.bottom);
+                const dist = Math.hypot(dx, dy);
+                
+                // Ha a kurzor a hatósugáron belül van, és még nem animál/nem volt animálva a közelmúltban
+                if (dist < triggerDist && !svg._isPulsing && !svg._hasPulsed) {
+                    svg._isPulsing = true;
+                    svg._hasPulsed = true; // Jelezzük, hogy ez a hover esemény már lefutott
+                    
+                    // Finom növekedés és visszacsökkenés (10%)
+                    gsap.to(svg, {
+                        scale: 1.1,
+                        duration: 0.6,
+                        ease: "power2.inOut",
+                        yoyo: true, // Automatikusan visszajátssza
+                        repeat: 1,  // Egyszer ismétli (tehát nő, majd csökken)
+                        onComplete: () => {
+                            svg._isPulsing = false;
+                        }
+                    });
+                } else if (dist >= triggerDist && svg._hasPulsed && !svg._isPulsing) {
+                    // Ha az egér eltávolodott és az animáció már lefutott, reseteljük, hogy újra triggerelhető legyen
+                    svg._hasPulsed = false;
+                }
+            });
         });
 
         // 4. Lebegő SVG Vektorok logikája
@@ -216,115 +266,126 @@
             '129517_vektor_01_asset.svg',
             '71.30.134_vektor_01_variacio.svg',
             '94.17.1_vektor_01_variacio.svg',
-            '32041_A_vektor_01_variacio.svg'
+            '32041_A_vektor_01_variacio.svg',
+            '134261_C_vektor_03.svg',
+            '121719_A_vektor_01.svg',
+            '110667_B_vektor_01.svg',
+            '134290b(2)_vektor_01.svg',
+            '54.55.56_B.svg',
+            '16489 (2).svg',
+            '64277(3).svg'
         ];
 
-        let activeSvgCount = 0;
-        const maxSvgs = 1; // Maximum 1 SVG a képernyőn egyszerre
+        // Képernyő foglaltságának ellenőrzése
+        let isScreenOccupied = false;
 
         function spawnRandomSvg() {
-            if (activeSvgCount >= maxSvgs) return;
-            activeSvgCount++;
+            if (isScreenOccupied) {
+                setTimeout(spawnRandomSvg, 1000); 
+                return;
+            }
+            isScreenOccupied = true;
 
             const mainContainer = document.getElementById('main-container');
             const el = document.createElement('img');
             
-            // Random fájl kiválasztása
             const chosenSvg = svgFiles[Math.floor(Math.random() * svgFiles.length)];
             el.src = chosenSvg;
             el.className = 'floating-svg';
-
-            // Z-index: Mindig legelöl, a PNG-k (10, 30) előtt
             el.style.zIndex = 40;
 
             mainContainer.appendChild(el);
 
-            // Dinamikus magasság-számítás a fejléc vastagsága alapján
             const headerHeight = document.querySelector('header').offsetHeight;
-
-            // Magasság beállítása (min 700px, max 1300px, de sosem nagyobb a képernyő magasságánál mínusz menü)
             let svgHeight = gsap.utils.random(700, 1300);
             const maxAvailableHeight = window.innerHeight - headerHeight;
             if (svgHeight > maxAvailableHeight) {
                 svgHeight = maxAvailableHeight;
             }
             
-            let direction = Math.random() > 0.5 ? 1 : -1; // 1 = balról jön be, -1 = jobbról jön be
+            let direction = Math.random() > 0.5 ? 1 : -1; 
             
-            // Különleges szabály: a 130864_A_vektor_01.svg kizárólag jobbról érkezhet
-            if (chosenSvg === '130864_A_vektor_01.svg') {
+            const rightOnlyFiles = ['130864_A_vektor_01.svg', '134261_C_vektor_03.svg', '54.55.56_B.svg', '16489 (2).svg'];
+            if (rightOnlyFiles.includes(chosenSvg)) {
                 direction = -1;
             }
             
-            // "Bekukucskálós" mozgás relatív értékekkel (xPercent) a képernyő széléhez képest
             const startXPercent = direction === 1 ? -150 : 50; 
-            const targetXPercent = direction === 1 ? gsap.utils.random(-20, 30) : gsap.utils.random(-130, -80);
+            
+            // Finomított célpozíció: Annyira jönnek be, hogy a teljes SVG látszódjon a képernyőn
+            let targetXPercent;
+            if (direction === 1) {
+                targetXPercent = gsap.utils.random(5, 10); // Balról beljebb ér (pozitív 5-10% ráhagyás)
+            } else {
+                targetXPercent = gsap.utils.random(-110, -105); // Jobbról teljesen beér (-100% jelenti az elem jobb szélét)
+            }
+            
             const horizontalAnchor = direction === 1 ? "0%" : "100%";
             
-            const stayDuration = gsap.utils.random(3, 4); // 3-4 mp-ig marad a képernyőn
-            const slideDuration = 2.5; // Lassabb becsúszás és kicsúszás sebessége (ease-in-out)
+            const stayDuration = gsap.utils.random(3, 4); 
+            const slideDuration = 3.2; // Lassított becsúszás (2.5-ről növelve)
 
-            // Elem kezdeti pozíciója (képernyőn kívül, fix méret, nincs fade, nincs forgatás)
             gsap.set(el, {
-                bottom: "0px", // Mindig a képernyő alsó vonalához igazítva
+                bottom: "0px",
                 left: horizontalAnchor,
                 height: `${svgHeight}px`,
                 width: 'auto',
-                opacity: 1, // Fixen látható (nincs fade)
+                opacity: 1, 
                 xPercent: startXPercent,
                 yPercent: 0, 
-                rotation: 0, // Teljesen vertikális marad
+                rotation: 0, 
                 transformOrigin: "bottom center"
             });
 
-            // Animációs idővonal létrehozása
             const tl = gsap.timeline({
                 onComplete: () => {
-                    el.remove(); // Eltávolítás a DOM-ból
-                    activeSvgCount--;
-                    // Random idő múlva új SVG indítása
+                    el.remove(); 
+                    isScreenOccupied = false;
                     setTimeout(spawnRandomSvg, gsap.utils.random(300, 1500));
                 }
             });
 
-            // Animáció: Csak az xPercent változik (ease-in-out), így méret/átlátszóság nem módosul
             tl.to(el, { xPercent: targetXPercent, duration: slideDuration, ease: "power2.inOut" })
               .to(el, { xPercent: startXPercent, duration: slideDuration, ease: "power2.inOut" }, `+=${stayDuration}`);
         }
 
-        // Kezdeti indítás
         setTimeout(spawnRandomSvg, 500);
 
         // 5. Különleges felülről bekukucskáló SVG logikája
         const topPeekerFiles = [
-            '74.150.1_vektor_01_jav.svg',
             '2023.80.12_C_vektor_01_arc.svg',
-            '43860_B_vektor_01.svg',
             '13447_vektor_01_variacio.svg',
             '65.113.3_01_variacio.svg',
-            '2020.18.10_vektor_01_variacio.svg'
+            '2020.18.10_vektor_01_variacio.svg',
+            '140971_M_vektor_01_variacio.svg'
         ];
 
         function spawnTopPeekerSvg() {
+            if (isScreenOccupied) {
+                setTimeout(spawnTopPeekerSvg, 1000); 
+                return;
+            }
+            isScreenOccupied = true;
+
             const mainContainer = document.getElementById('main-container');
             const el = document.createElement('img');
             
-            // Véletlenszerűen választ a felülről érkező fájlok közül
             el.src = topPeekerFiles[Math.floor(Math.random() * topPeekerFiles.length)];
             el.className = 'floating-svg';
-            el.style.zIndex = 40; // Ez is legyen legelöl
+            el.style.zIndex = 40; 
 
             mainContainer.appendChild(el);
 
             const headerHeight = document.querySelector('header').offsetHeight;
             const mainHeight = window.innerHeight - headerHeight;
-            let peekerHeight = gsap.utils.random(250, 500); // Feleakkora méret (250-500px)
+            
+            // A magasságot kétharmadára (2/3) csökkentettük (165px és 335px között)
+            let peekerHeight = gsap.utils.random(165, 335); 
             if (peekerHeight > mainHeight) peekerHeight = mainHeight;
 
-            // Kezdeti pozíció (menü alatt, de yPercent: -100 miatt láthatatlanul a main-container tetején túl van)
             gsap.set(el, {
                 top: 0,
-                left: `${gsap.utils.random(10, 90)}%`, // Random vízszintes helyzet (jobb, bal, közép)
+                left: `${gsap.utils.random(10, 90)}%`, 
                 height: `${peekerHeight}px`,
                 width: 'auto',
                 xPercent: -50,
@@ -334,27 +395,76 @@
                 rotation: 0
             });
 
-            // Maximum a 3/4-e látszódhat, és nem mehet a képernyő felénél lejjebb
             const maxVisiblePixels = Math.min(peekerHeight * 0.75, mainHeight / 2);
-            
-            const stayDuration = gsap.utils.random(2, 3); // 2-3 mp-ig marad
-            const slideDuration = 2.5; // Kellemes, lassú ease-in-out
+            const stayDuration = gsap.utils.random(2, 3); 
+            const slideDuration = 2.5; 
 
             const tl = gsap.timeline({
                 onComplete: () => {
                     el.remove();
-                    // Újraindítás 10-20 másodperc múlva (garantálja, hogy sosem jelennek meg egyszerre)
+                    isScreenOccupied = false;
                     setTimeout(spawnTopPeekerSvg, gsap.utils.random(10000, 20000));
                 }
             });
 
-            // Animáció: y tengelyen elmozdítjuk lefelé (pixelekben), majd vissza
             tl.to(el, { y: maxVisiblePixels, duration: slideDuration, ease: "power2.inOut" })
               .to(el, { y: 0, duration: slideDuration, ease: "power2.inOut" }, `+=${stayDuration}`);
         }
 
-        // A felülről érkező elem első indítása (10-20 másodperc között)
         setTimeout(spawnTopPeekerSvg, gsap.utils.random(10000, 20000));
+
+        // 6. Átrepülő (Flying) SVG logikája
+        const flyingFiles = [
+            '106711_vektor_10.svg',
+            '61.47.52_A_vektor_01.svg'
+        ];
+
+        function spawnFlyingSvg() {
+            const mainContainer = document.getElementById('main-container');
+            const el = document.createElement('img');
+            
+            const chosenFly = flyingFiles[Math.floor(Math.random() * flyingFiles.length)];
+            el.src = chosenFly;
+            el.className = 'floating-svg';
+            el.style.zIndex = 7; 
+
+            mainContainer.appendChild(el);
+
+            const headerHeight = document.querySelector('header').offsetHeight;
+            const mainHeight = window.innerHeight - headerHeight;
+            
+            let flyHeight = gsap.utils.random(mainHeight * 0.15, mainHeight * 0.25);
+
+            // Ha ez a specifikus repülő van soron, 10%-kal növeljük a méretét
+            if (chosenFly === '106711_vektor_10.svg') {
+                flyHeight *= 1.10;
+            }
+
+            gsap.set(el, {
+                top: '50%',
+                left: '100%',
+                height: `${flyHeight}px`,
+                width: 'auto',
+                xPercent: 0,
+                yPercent: -50, 
+                opacity: 1,
+                rotation: 0 
+            });
+
+            const flyDuration = gsap.utils.random(8, 12); 
+
+            const tl = gsap.timeline({
+                onComplete: () => {
+                    el.remove();
+                    setTimeout(spawnFlyingSvg, gsap.utils.random(20000, 30000));
+                }
+            });
+
+            tl.to(el, { left: '0%', xPercent: -100, duration: flyDuration, ease: "none" });
+        }
+
+        setTimeout(spawnFlyingSvg, gsap.utils.random(5000, 15000));
+
     </script>
 </body>
 </html>
