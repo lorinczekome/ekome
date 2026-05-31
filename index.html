@@ -5,29 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>MOTÍVUMALKOTÓ</title>
     
-    <!-- Betöltjük a 400, 500, 600 és a 700-as Montserrat verziót is -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <!-- Betöltjük a 300 (Light), 400, 500, 600 és a 700-as Montserrat verziót is -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
     <style>
         html, body {
-            margin: 0; padding: 0; width: 100%; height: 100%;
+            margin: 0; padding: 0; width: 100%;
             background-color: #f9f9f9 !important;
             font-family: 'Montserrat', sans-serif;
-            overflow: hidden;
-            display: flex; flex-direction: column;
+            overflow-x: hidden;
+            overflow-y: auto; 
+            scroll-behavior: smooth; /* Sima görgetés, ha a felhasználó magától görget */
         }
 
         header {
             height: 80px; display: flex; justify-content: space-between; align-items: center;
             padding: 0 32px; border-bottom: 1px solid #E5E5E5; background-color: #f9f9f9;
-            flex-shrink: 0; z-index: 1000;
+            flex-shrink: 0; z-index: 2000;
+            position: fixed; top: 0; left: 0; width: 100%; box-sizing: border-box; /* Fix letapadó menüsor */
             transition: height 0.3s ease;
         }
 
         .logo-text { 
-            font-size: 20px; font-weight: 500; /* Vékonyabb (500-as) betű */
+            font-size: 20px; font-weight: 500; 
             display: flex; align-items: center; flex-direction: row; gap: 6px;
+            cursor: pointer; /* Kéz ikon a Home funkcióhoz */
         }
         
         #logo-suffix {
@@ -38,27 +41,39 @@
         .hamburger { display: none; cursor: pointer; flex-direction: column; gap: 5px; z-index: 1001; }
         .hamburger div { width: 25px; height: 2px; background: #000; transition: all 0.3s; }
 
+        /* App container a parallaxos részhez */
+        #app-container {
+            display: flex; flex-direction: column; width: 100%; 
+            height: calc(100vh - 80px); /* A teljes képernyőből kivonjuk a fejlécet */
+            margin-top: 80px; /* Helykihagyás a fix header miatt */
+            background-color: #f9f9f9;
+        }
+
         @media (max-width: 900px) {
-            header { height: 100px; } /* Vastagabb fejléc mobilon */
+            header { height: 100px; }
+            #app-container { 
+                height: calc(100vh - 100px); 
+                margin-top: 100px; /* Helykihagyás mobilon is */
+            }
+            
             .nav-container { display: none; }
             .hamburger { display: flex; }
             
             .logo-text { 
                 flex-direction: column; align-items: flex-start; justify-content: center; 
-                gap: 2px; font-size: 16px; /* 2 soros megjelenítés, picit kisebb betűvel, hogy jól elférjen */
+                gap: 2px; font-size: 16px; 
             }
         }
 
-        /* Slide-in animáció a mobil menünek */
+        /* Mobil menü */
         #mobile-menu {
             position: fixed; top: 0; right: -100%; width: 100%; height: 100%;
             background: #000000; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 40px; z-index: 999;
+            gap: 40px; z-index: 1900; /* Header alatt, de minden más felett */
             transition: right 0.5s ease-in-out;
         }
         #mobile-menu.open { right: 0; }
 
-        /* X ikon animáció - marad fekete */
         .hamburger.active div:nth-child(1) { transform: rotate(45deg) translate(7px, 6px); }
         .hamburger.active div:nth-child(2) { opacity: 0; }
         .hamburger.active div:nth-child(3) { transform: rotate(-45deg) translate(7px, -6px); }
@@ -70,46 +85,104 @@
         .btn-primary { 
             background: #000; color: #e0e0e0; padding: 12px 32px; 
             text-decoration: none !important; font-size: 12px; font-weight: 600; letter-spacing: 1px; 
-            transition: all 0.3s ease;
-            border-radius: 0px;
+            transition: all 0.3s ease; border-radius: 0px;
         }
         .btn-primary:hover { 
-            background: #333; color: #ffffff; border-radius: 12px; 
-            padding: 16px 32px; /* 4-4 px növelés alul-felül */
+            background: #333; color: #ffffff; border-radius: 12px; padding: 16px 32px; 
         }
-
-        #mobile-menu .btn-primary {
-            border: 1px solid #888888; /* Középszürke outline csak a mobil menüben */
-        }
+        #mobile-menu .btn-primary { border: 1px solid #888888; }
 
         main { flex-grow: 1; position: relative; overflow: hidden; background-color: #f9f9f9; }
         .parallax-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center bottom; background-repeat: repeat-x; }
 
-        /* Dombos minimalista háttér - 3 különböző magasságú domb */
+        /* Dombos minimalista háttér */
         #hills-container {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; z-index: 5; pointer-events: none; overflow: hidden;
         }
         .hill { position: absolute; background-color: #e8e8e8; border-radius: 50%; }
-        .hill-1 { width: 150vw; height: 100vh; left: -30vw; top: 40%; } /* Közepes, bal oldali */
-        .hill-2 { width: 120vw; height: 130vh; left: 15vw; top: 20%; }  /* Magas, középső */
-        .hill-3 { width: 160vw; height: 80vh; left: 45vw; top: 55%; }   /* Alacsonyabb, lankás jobb oldali */
+        .hill-1 { width: 150vw; height: 100vh; left: -30vw; top: 40%; } 
+        .hill-2 { width: 120vw; height: 130vh; left: 15vw; top: 20%; }  
+        .hill-3 { width: 160vw; height: 80vh; left: 45vw; top: 55%; }   
 
-        /* Lebegő SVG vektorok alapstílusa */
         .floating-svg {
-            position: absolute;
-            pointer-events: none; /* Ne akadályozza az egérkattintásokat */
-            will-change: transform, opacity;
+            position: absolute; pointer-events: none; will-change: transform, opacity;
         }
 
-        footer { height: 50px; background: #ffffff; border-top: 1px solid #E5E5E5; display: flex; justify-content: space-between; align-items: center; padding: 0 32px; font-size: 12px; flex-shrink: 0; }
+        /* Új lábléc struktúra 1 pixeles középszürke alsó vonallal */
+        footer { 
+            height: 50px; background: #ffffff; border-top: 1px solid #E5E5E5; border-bottom: 1px solid #888888;
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 0 32px; font-size: 12px; flex-shrink: 0; 
+        }
+        .footer-col { flex: 1; display: flex; align-items: center; }
+        .footer-left { justify-content: flex-start; }
+        .footer-center { justify-content: center; }
+        .footer-right { justify-content: flex-end; }
+        
         footer a { color: #000; text-decoration: none; font-weight: 600; transition: opacity 0.3s ease; }
         footer a:hover { opacity: 0.6; }
+
+        .down-arrow-btn {
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            padding: 5px 20px; transition: transform 0.3s ease;
+        }
+        .down-arrow-btn:hover { transform: translateY(4px); }
+
+        /* --- SZÖVEGES KÉPERNYŐ (ÚJ) --- */
+        #text-screen {
+            background: #ffffff; width: 100%;
+            padding: 60px 20px 60px 20px; box-sizing: border-box;
+        }
+        .text-screen-inner {
+            max-width: 72ch; /* Maximum 72 karakteres sorhossz */
+            margin: 0 auto;
+            position: relative;
+        }
+        .text-screen-inner h2 {
+            font-family: 'Montserrat', sans-serif; font-weight: 400; font-size: 32px; /* 32px címméret, kicsit vastagabb 400-as súly */
+            color: #000; margin-top: 0; margin-bottom: 40px; text-align: left;
+        }
+        .text-screen-inner p {
+            font-family: 'Montserrat', sans-serif; font-weight: 300; font-size: 17px;
+            line-height: 1.6; color: #000; margin-bottom: 24px; text-align: left; /* Szabadsoros szedés */
+        }
+        
+        /* A szöveg alatti kép stílusa */
+        .text-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 40px 0 10px 0; /* Alsó margó csökkentve a felirat miatt */
+            border-radius: 4px;
+        }
+
+        .image-caption {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 13px;
+            color: #000;
+            text-align: left;
+            line-height: 1.5;
+            margin-bottom: 40px;
+        }
+
+        .up-arrow-btn {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            margin-top: 60px; cursor: pointer; padding: 10px; transition: transform 0.3s ease;
+        }
+        .up-arrow-btn:hover { transform: translateY(-4px); }
+
+        .up-arrow-text {
+            font-family: 'Montserrat', sans-serif; font-size: 14px; color: #000;
+            margin-top: 8px; text-align: center;
+        }
+
     </style>
 </head>
 <body>
 
+    <!-- STICKY HEADER -->
     <header>
-        <div class="logo-text">
+        <div class="logo-text" onclick="scrollToTop(event)">
             <span>BEMUTATKOZNAK A</span>
             <span>MOTÍVUM<span id="logo-suffix">LÉNYEK</span></span>
         </div>
@@ -122,31 +195,86 @@
         </div>
     </header>
 
+    <!-- APP CONTAINER: Parallax szekció -->
+    <div id="app-container">
+        <main id="main-container">
+            <div id="hills-container">
+                <div class="hill hill-1"></div>
+                <div class="hill hill-2"></div>
+                <div class="hill hill-3"></div>
+            </div>
+            <div class="parallax-layer" id="layer-bg" style="background-image: url('MotivumCsapat_backArtboard 1.png'); z-index: 10;"></div>
+            <div class="parallax-layer" id="layer-fg" style="background-image: url('MotivumCsapat_frontArtboard 1.png'); z-index: 30;"></div>
+        </main>
+
+        <footer>
+            <div class="footer-col footer-left">
+                <div>© 2026 MOTÍVUMALKOTÓ</div>
+            </div>
+            <div class="footer-col footer-center">
+                <!-- Lefelé mutató nyíl a Curve Swipe-al -->
+                <div class="down-arrow-btn" onclick="scrollToText(event)">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+            </div>
+            <div class="footer-col footer-right">
+                <a href="https://www.instagram.com/motifcreator" target="_blank" rel="noopener noreferrer">INSTAGRAM</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- MOBIL MENÜ -->
     <div id="mobile-menu">
         <a href="https://neprajz.hu/hirek/2022/keszits-sajat-designt-a-neprajzi-muzeum-uj-alkalmazasaval.html" target="_blank" rel="noopener noreferrer" class="mobile-nav-link">A PROJEKTRŐL</a>
         <a href="https://www.motivumalkoto.hu" target="_blank" rel="noopener noreferrer" class="btn-primary">MOTÍVUMALKOTÓ</a>
     </div>
 
-    <main id="main-container">
-        <!-- Minimalista dombok (z-index: 5) -->
-        <div id="hills-container">
-            <div class="hill hill-1"></div>
-            <div class="hill hill-2"></div>
-            <div class="hill hill-3"></div>
-        </div>
-        
-        <!-- Háttér PNG (z-index: 10) -->
-        <div class="parallax-layer" id="layer-bg" style="background-image: url('MotivumCsapat_backArtboard 1.png'); z-index: 10;"></div>
-        <!-- Előtér PNG (z-index: 30) -->
-        <div class="parallax-layer" id="layer-fg" style="background-image: url('MotivumCsapat_frontArtboard 1.png'); z-index: 30;"></div>
-    </main>
+    <!-- SZÖVEGES KÉPERNYŐ -->
+    <div id="text-screen">
+        <div class="text-screen-inner">
+            <h2>Emberek, miskák, huszárok, leányok, szeretők, ördögök, betyárok és szellemek a Motívumalkotóban</h2>
+            <p>A néprajzi tárgyakon az emberábrázolás ritkább, mint a virág- vagy állatmotívumoké, mégis a gyűjtemény egyik legizgalmasabb rétege. A Motívumalkotó anyaga alapján az alakok a Kárpát-medencei tárgykultúrától a távoli régiókig ívelnek: megjelennek cserépbokályokon, tükrösökön, ikonokon, szentképeken, maszkokon, sámántárgyakon, festett edényeken és faragott használati eszközökön is. Az emberalak hol jelzésszerű, hol részletgazdag, és a viselet, a testtartás vagy a kezében tartott tárgy sokszor azt is megmutatja, ki áll előttünk: betyár, huszár, pásztor, leány, mesterember, táncos, katona vagy éppen valamelyik közösségi szerep képviselője.</p>
+            <p>A formák és technikák változatossága szinte végigkíséri ezt a motívumkört. Van, hogy a technika festés, rajzolás, máskor karcolás, stencilezés, máz alatti díszítés, üvegfestés, hímzés, domborítás vagy faragás. A mohácsi vörösbarna maszk, a csákós huszárrá formált cserép, azaz a miskakancsó, a barokk ruhás férfival díszített osztrák bokály, vagy a sámánszertartáskor használt szibériai dob mind azt mutatja, hogy az emberábrázolás nem egyetlen stílushoz kötődik, hanem nagyon különböző közegben él tovább. A népi tárgyakon az alak nem csak dísz: egyszerre hordoz hitet, emlékezetet, rangot és történetet.</p>
+            <p>A magyar anyagon belül különösen erős a pásztorfaragás és a figurális faragványok világa. A korai emberalakos motívumoktól a 19. századi huszár- és betyárábrázolásokig jól látszik, hogy a képi nyelv egyre részletesebbé vált. Ebben a fejlődési ívben Király Zsiga neve is fontos, de nem egyedülálló jelenségként: inkább annak bizonyítékaként, hogy a pásztor- és faragóhagyományban az emberalak saját, hosszú életű formanyelvet kapott. Ez a sokszínűség teszi az emberábrázolást a néprajzi tárgyak egyik legélőbb és legbeszédesebb témájává.</p>
+            
+            <!-- Reszponzív kép a szöveg alatt -->
+            <img src="emberabrazolas_01.jpg" alt="Emberábrázolás a gyűjteményben" class="text-image">
+            
+            <!-- Képaláírás -->
+            <div class="image-caption">
+                Tükrös díszítése köszöntős életképpel,<br>
+                Zala megye, 19. század második fele,<br>
+                lsz.: NM 69483
+            </div>
 
-    <footer>
-        <div>© 2026 MOTÍVUMALKOTÓ</div>
-        <a href="https://www.instagram.com/motifcreator" target="_blank" rel="noopener noreferrer">INSTAGRAM</a>
-    </footer>
+            <!-- Felfelé mutató nyíl az oldal alján (Curve Swipe visszatérés) -->
+            <div class="up-arrow-btn" onclick="scrollToTop(event)">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+                <div class="up-arrow-text">az oldal tetejére</div>
+            </div>
+        </div>
+    </div>
 
     <script>
+        // --- Sima görgetés logikája ---
+        // Javítás: a header magasságával eltolva scrollozunk le, hogy ne takarja ki a címet
+        function scrollToText(e) {
+            if(e && e.preventDefault) e.preventDefault();
+            const textScreen = document.getElementById('text-screen');
+            const headerHeight = document.querySelector('header').offsetHeight;
+            const y = textScreen.getBoundingClientRect().top + window.scrollY - headerHeight;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+
+        function scrollToTop(e) {
+            if(e && e.preventDefault) e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         // 1. Menü logikája
         function toggleMenu() {
             const menu = document.getElementById('mobile-menu');
@@ -195,7 +323,6 @@
         let mouseX = 0;
         let currentPos = 0;
 
-        // Proximity (Távolság alapú nagyítás) egerének koordinátái
         let mouseXpx = -1000; 
         let mouseYpx = -1000;
 
@@ -209,11 +336,9 @@
         gsap.ticker.add(() => {
             frame++;
             if (window.innerWidth < 900) {
-                // Tovább lassított automatikus mozgás
                 gsap.set(bg, { backgroundPositionX: (frame * 0.35) + "px" });
                 gsap.set(fg, { backgroundPositionX: (frame * 1.05) + "px" });
             } else {
-                // Tovább lassított egérkövető mozgás
                 currentPos += mouseX * 2.15;
                 gsap.set(bg, { backgroundPositionX: currentPos * 0.2 + "px" });
                 gsap.set(fg, { backgroundPositionX: currentPos * 0.8 + "px" });
@@ -221,34 +346,30 @@
 
             // --- PROXIMITY PULSE EFFEKT ---
             const svgs = document.querySelectorAll('.floating-svg');
-            const triggerDist = 200; // Hatósugár pixelben
+            const triggerDist = 200; 
 
             svgs.forEach(svg => {
                 const rect = svg.getBoundingClientRect();
                 
-                // Távolság kiszámítása az SVG befoglaló dobozának a legközelebbi pontjától
                 const dx = Math.max(rect.left - mouseXpx, 0, mouseXpx - rect.right);
                 const dy = Math.max(rect.top - mouseYpx, 0, mouseYpx - rect.bottom);
                 const dist = Math.hypot(dx, dy);
                 
-                // Ha a kurzor a hatósugáron belül van, és még nem animál/nem volt animálva a közelmúltban
                 if (dist < triggerDist && !svg._isPulsing && !svg._hasPulsed) {
                     svg._isPulsing = true;
-                    svg._hasPulsed = true; // Jelezzük, hogy ez a hover esemény már lefutott
+                    svg._hasPulsed = true; 
                     
-                    // Finom növekedés és visszacsökkenés (10%)
                     gsap.to(svg, {
                         scale: 1.1,
                         duration: 0.6,
                         ease: "power2.inOut",
-                        yoyo: true, // Automatikusan visszajátssza
-                        repeat: 1,  // Egyszer ismétli (tehát nő, majd csökken)
+                        yoyo: true, 
+                        repeat: 1,  
                         onComplete: () => {
                             svg._isPulsing = false;
                         }
                     });
                 } else if (dist >= triggerDist && svg._hasPulsed && !svg._isPulsing) {
-                    // Ha az egér eltávolodott és az animáció már lefutott, reseteljük, hogy újra triggerelhető legyen
                     svg._hasPulsed = false;
                 }
             });
@@ -256,27 +377,14 @@
 
         // 4. Lebegő SVG Vektorok logikája
         const svgFiles = [
-            '12510_vektor_01.svg',
-            '43342_vektor_01.svg',
-            'NM_81.137.1_vektor_01.svg',
-            '130864_A_vektor_01.svg',
-            '37766.svg',
-            '121719_A_vektor_02.svg',
-            '134432_A_vektor_01.svg',
-            '129517_vektor_01_asset.svg',
-            '71.30.134_vektor_01_variacio.svg',
-            '94.17.1_vektor_01_variacio.svg',
-            '32041_A_vektor_01_variacio.svg',
-            '134261_C_vektor_03.svg',
-            '121719_A_vektor_01.svg',
-            '110667_B_vektor_01.svg',
-            '134290b(2)_vektor_01.svg',
-            '54.55.56_B.svg',
-            '16489 (2).svg',
-            '64277(3).svg'
+            '12510_vektor_01.svg', '43342_vektor_01.svg', 'NM_81.137.1_vektor_01.svg',
+            '130864_A_vektor_01.svg', '37766.svg', '121719_A_vektor_02.svg',
+            '134432_A_vektor_01.svg', '129517_vektor_01_asset.svg', '71.30.134_vektor_01_variacio.svg',
+            '94.17.1_vektor_01_variacio.svg', '32041_A_vektor_01_variacio.svg', '134261_C_vektor_03.svg',
+            '121719_A_vektor_01.svg', '110667_B_vektor_01.svg', '134290b(2)_vektor_01.svg',
+            '54.55.56_B.svg', '16489 (2).svg', '64277(3).svg'
         ];
 
-        // Képernyő foglaltságának ellenőrzése
         let isScreenOccupied = false;
 
         function spawnRandomSvg() {
@@ -306,41 +414,30 @@
             let direction = Math.random() > 0.5 ? 1 : -1; 
             
             const rightOnlyFiles = ['130864_A_vektor_01.svg', '134261_C_vektor_03.svg', '54.55.56_B.svg', '16489 (2).svg'];
-            if (rightOnlyFiles.includes(chosenSvg)) {
-                direction = -1;
-            }
+            if (rightOnlyFiles.includes(chosenSvg)) { direction = -1; }
             
             const startXPercent = direction === 1 ? -150 : 50; 
             
-            // Finomított célpozíció: Annyira jönnek be, hogy a teljes SVG látszódjon a képernyőn
             let targetXPercent;
             if (direction === 1) {
-                targetXPercent = gsap.utils.random(5, 10); // Balról beljebb ér (pozitív 5-10% ráhagyás)
+                targetXPercent = gsap.utils.random(5, 10); 
             } else {
-                targetXPercent = gsap.utils.random(-110, -105); // Jobbról teljesen beér (-100% jelenti az elem jobb szélét)
+                targetXPercent = gsap.utils.random(-110, -105); 
             }
             
             const horizontalAnchor = direction === 1 ? "0%" : "100%";
-            
             const stayDuration = gsap.utils.random(3, 4); 
-            const slideDuration = 3.2; // Lassított becsúszás (2.5-ről növelve)
+            const slideDuration = 3.2; 
 
             gsap.set(el, {
-                bottom: "0px",
-                left: horizontalAnchor,
-                height: `${svgHeight}px`,
-                width: 'auto',
-                opacity: 1, 
-                xPercent: startXPercent,
-                yPercent: 0, 
-                rotation: 0, 
-                transformOrigin: "bottom center"
+                bottom: "0px", left: horizontalAnchor, height: `${svgHeight}px`,
+                width: 'auto', opacity: 1, xPercent: startXPercent,
+                yPercent: 0, rotation: 0, transformOrigin: "bottom center"
             });
 
             const tl = gsap.timeline({
                 onComplete: () => {
-                    el.remove(); 
-                    isScreenOccupied = false;
+                    el.remove(); isScreenOccupied = false;
                     setTimeout(spawnRandomSvg, gsap.utils.random(300, 1500));
                 }
             });
@@ -353,10 +450,8 @@
 
         // 5. Különleges felülről bekukucskáló SVG logikája
         const topPeekerFiles = [
-            '2023.80.12_C_vektor_01_arc.svg',
-            '13447_vektor_01_variacio.svg',
-            '65.113.3_01_variacio.svg',
-            '2020.18.10_vektor_01_variacio.svg',
+            '2023.80.12_C_vektor_01_arc.svg', '13447_vektor_01_variacio.svg',
+            '65.113.3_01_variacio.svg', '2020.18.10_vektor_01_variacio.svg',
             '140971_M_vektor_01_variacio.svg'
         ];
 
@@ -371,28 +466,19 @@
             const el = document.createElement('img');
             
             el.src = topPeekerFiles[Math.floor(Math.random() * topPeekerFiles.length)];
-            el.className = 'floating-svg';
-            el.style.zIndex = 40; 
+            el.className = 'floating-svg'; el.style.zIndex = 40; 
 
             mainContainer.appendChild(el);
 
             const headerHeight = document.querySelector('header').offsetHeight;
             const mainHeight = window.innerHeight - headerHeight;
             
-            // A magasságot kétharmadára (2/3) csökkentettük (165px és 335px között)
             let peekerHeight = gsap.utils.random(165, 335); 
             if (peekerHeight > mainHeight) peekerHeight = mainHeight;
 
             gsap.set(el, {
-                top: 0,
-                left: `${gsap.utils.random(10, 90)}%`, 
-                height: `${peekerHeight}px`,
-                width: 'auto',
-                xPercent: -50,
-                yPercent: -100, 
-                y: 0,
-                opacity: 1,
-                rotation: 0
+                top: 0, left: `${gsap.utils.random(10, 90)}%`, height: `${peekerHeight}px`,
+                width: 'auto', xPercent: -50, yPercent: -100, y: 0, opacity: 1, rotation: 0
             });
 
             const maxVisiblePixels = Math.min(peekerHeight * 0.75, mainHeight / 2);
@@ -401,8 +487,7 @@
 
             const tl = gsap.timeline({
                 onComplete: () => {
-                    el.remove();
-                    isScreenOccupied = false;
+                    el.remove(); isScreenOccupied = false;
                     setTimeout(spawnTopPeekerSvg, gsap.utils.random(10000, 20000));
                 }
             });
@@ -414,10 +499,7 @@
         setTimeout(spawnTopPeekerSvg, gsap.utils.random(10000, 20000));
 
         // 6. Átrepülő (Flying) SVG logikája
-        const flyingFiles = [
-            '106711_vektor_10.svg',
-            '61.47.52_A_vektor_01.svg'
-        ];
+        const flyingFiles = ['106711_vektor_10.svg', '61.47.52_A_vektor_01.svg', '15161_D_variacio.svg'];
 
         function spawnFlyingSvg() {
             const mainContainer = document.getElementById('main-container');
@@ -425,8 +507,7 @@
             
             const chosenFly = flyingFiles[Math.floor(Math.random() * flyingFiles.length)];
             el.src = chosenFly;
-            el.className = 'floating-svg';
-            el.style.zIndex = 7; 
+            el.className = 'floating-svg'; el.style.zIndex = 7; 
 
             mainContainer.appendChild(el);
 
@@ -434,33 +515,33 @@
             const mainHeight = window.innerHeight - headerHeight;
             
             let flyHeight = gsap.utils.random(mainHeight * 0.15, mainHeight * 0.25);
-
-            // Ha ez a specifikus repülő van soron, 10%-kal növeljük a méretét
-            if (chosenFly === '106711_vektor_10.svg') {
-                flyHeight *= 1.10;
-            }
-
-            gsap.set(el, {
-                top: '50%',
-                left: '100%',
-                height: `${flyHeight}px`,
-                width: 'auto',
-                xPercent: 0,
-                yPercent: -50, 
-                opacity: 1,
-                rotation: 0 
-            });
+            if (chosenFly === '106711_vektor_10.svg') { flyHeight *= 1.10; }
 
             const flyDuration = gsap.utils.random(8, 12); 
 
             const tl = gsap.timeline({
                 onComplete: () => {
                     el.remove();
+                    // Csak egy átrepülő objektum lehet, mivel a következő mindig csak az előző animáció lejárta után indul
                     setTimeout(spawnFlyingSvg, gsap.utils.random(20000, 30000));
                 }
             });
 
-            tl.to(el, { left: '0%', xPercent: -100, duration: flyDuration, ease: "none" });
+            if (chosenFly === '15161_D_variacio.svg') {
+                // Új viselkedés: Balról jobbra, 2/3 magasságban (~66%)
+                gsap.set(el, {
+                    top: '66%', left: '0%', height: `${flyHeight}px`, width: 'auto',
+                    xPercent: -100, yPercent: -50, opacity: 1, rotation: 0 
+                });
+                tl.to(el, { left: '100%', xPercent: 0, duration: flyDuration, ease: "none" });
+            } else {
+                // Eredeti viselkedés: Jobbról balra, középmagasságban (~50%)
+                gsap.set(el, {
+                    top: '50%', left: '100%', height: `${flyHeight}px`, width: 'auto',
+                    xPercent: 0, yPercent: -50, opacity: 1, rotation: 0 
+                });
+                tl.to(el, { left: '0%', xPercent: -100, duration: flyDuration, ease: "none" });
+            }
         }
 
         setTimeout(spawnFlyingSvg, gsap.utils.random(5000, 15000));
